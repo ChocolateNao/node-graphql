@@ -6,4 +6,4 @@ export interface IGraphQLContext {
   fastify: FastifyInstance;
   prisma: PrismaClient;
   loaders: TLoaders;
-};
+}
