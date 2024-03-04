@@ -18,10 +18,8 @@ export const getUsersQuery: GraphQLFieldConfig<null, IGraphQLContext> = {
       parseResolveInfo(info) as ResolveTree,
       UserObjectType as GraphQLType,
     );
-
     const withSubscription = 'subscribedToUser' in fields;
     const withAuthors = 'userSubscribedTo' in fields;
-
     const users = await prisma.user.findMany({
       include: {
         subscribedToUser: withSubscription,
@@ -31,19 +29,17 @@ export const getUsersQuery: GraphQLFieldConfig<null, IGraphQLContext> = {
 
     if (withSubscription || withAuthors) {
       const usersMap = Object.fromEntries(users.map((user) => [user.id, user]));
-
       users.forEach((user) => {
         if (withSubscription) {
           loaders.subscribedToUserLoader.prime(
             user.id,
-            user.subscribedToUser.map((r) => usersMap[r.subscriberId]),
+            user.subscribedToUser.map((author) => usersMap[author.subscriberId]),
           );
         }
-
         if (withAuthors) {
           loaders.userSubscribedToLoader.prime(
             user.id,
-            user.userSubscribedTo.map((r) => usersMap[r.authorId]),
+            user.userSubscribedTo.map((author) => usersMap[author.authorId]),
           );
         }
       });
