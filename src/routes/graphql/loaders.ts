@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 import type { MemberType as Member, Post, Profile, User } from '@prisma/client';
-import type { Author, Subscription } from './types/subscriptions.js';
+import type { IAuthor, ISubscription } from './types/subscriptions.js';
 
 export const loaders = (prisma: PrismaClient) => ({
   postsLoader: postsLoader(prisma),
@@ -59,8 +59,8 @@ const userLoader = (prisma: PrismaClient) =>
   });
 
 const subscribedToUserLoader = (prisma: PrismaClient) =>
-  new DataLoader<string, Author[]>(async (userIds: ReadonlyArray<User['id']>) => {
-    const authors: Author[] = await prisma.user.findMany({
+  new DataLoader<string, IAuthor[]>(async (userIds: ReadonlyArray<User['id']>) => {
+    const authors: IAuthor[] = await prisma.user.findMany({
       where: { userSubscribedTo: { some: { authorId: { in: [...userIds] } } } },
       include: { userSubscribedTo: true },
     });
@@ -72,14 +72,14 @@ const subscribedToUserLoader = (prisma: PrismaClient) =>
         map.set(subscription.authorId, authorsList);
       });
       return map;
-    }, new Map<string, Author[]>());
+    }, new Map<string, IAuthor[]>());
 
     return userIds.map((id) => authorsById.get(id) ?? []);
   });
 
 const userToSubscribeLoader = (prisma: PrismaClient) =>
-  new DataLoader<string, Subscription[]>(async (userIds: ReadonlyArray<User['id']>) => {
-    const subscriptions: Subscription[] = await prisma.user.findMany({
+  new DataLoader<string, ISubscription[]>(async (userIds: ReadonlyArray<User['id']>) => {
+    const subscriptions: ISubscription[] = await prisma.user.findMany({
       where: {
         subscribedToUser: { some: { subscriberId: { in: [...userIds] } } },
       },
@@ -93,7 +93,7 @@ const userToSubscribeLoader = (prisma: PrismaClient) =>
         map.set(subscription.subscriberId, existingSubscriptions);
       });
       return map;
-    }, new Map<string, Subscription[]>());
+    }, new Map<string, ISubscription[]>());
 
     return userIds.map((id) => subscriptionsBySubscriberId.get(id) ?? []);
   });

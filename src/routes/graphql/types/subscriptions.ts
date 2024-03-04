@@ -1,9 +1,9 @@
 import type { User, SubscribersOnAuthors } from '@prisma/client';
 
-export interface Author extends User {
+export interface IAuthor extends User {
   userSubscribedTo: SubscribersOnAuthors[];
 }
 
-export interface Subscription extends User {
+export interface ISubscription extends User {
   subscribedToUser: SubscribersOnAuthors[];
 }
