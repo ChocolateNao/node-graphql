@@ -8,7 +8,7 @@ export const loaders = (prisma: PrismaClient) => ({
   profileLoader: profileLoader(prisma),
   userLoader: userLoader(prisma),
   userSubscribedToLoader: userToSubscribeLoader(prisma),
-  subscribedToUser: subscribedToUserLoader(prisma),
+  subscribedToUserLoader: subscribedToUserLoader(prisma),
   memeberTypeLoader: memberLoader(prisma),
 });
 
@@ -30,12 +30,12 @@ const postsLoader = (prisma: PrismaClient) =>
 
     const postsMap = new Map<string, Post[]>();
     posts.forEach((post) => {
-      const postsAuthor = postsMap.get(post.authorId) || [];
+      const postsAuthor = postsMap.get(post.authorId) ?? [];
       postsAuthor.push(post);
       postsMap.set(post.authorId, postsAuthor);
     });
 
-    return userIds.map((id) => postsMap.get(id) || []);
+    return userIds.map((id) => postsMap.get(id) ?? []);
   });
 
 const profileLoader = (prisma: PrismaClient) =>
@@ -45,7 +45,7 @@ const profileLoader = (prisma: PrismaClient) =>
     });
 
     const profileMap = new Map(profiles.map((profile) => [profile.userId, profile]));
-    return userIds.map((id) => profileMap.get(id) || null);
+    return userIds.map((id) => profileMap.get(id) ?? null);
   });
 
 const userLoader = (prisma: PrismaClient) =>
@@ -55,7 +55,7 @@ const userLoader = (prisma: PrismaClient) =>
     });
 
     const userMap = new Map(users.map((user) => [user.id, user]));
-    return userIds.map((id) => userMap.get(id) || null);
+    return userIds.map((id) => userMap.get(id) ?? null);
   });
 
 const subscribedToUserLoader = (prisma: PrismaClient) =>
@@ -67,14 +67,14 @@ const subscribedToUserLoader = (prisma: PrismaClient) =>
 
     const authorsById = authors.reduce((map, author) => {
       author.userSubscribedTo.forEach((subscription) => {
-        const authorsList = map.get(subscription.authorId) || [];
+        const authorsList = map.get(subscription.authorId) ?? [];
         authorsList.push(author);
         map.set(subscription.authorId, authorsList);
       });
       return map;
     }, new Map<string, Author[]>());
 
-    return userIds.map((id) => authorsById.get(id) || []);
+    return userIds.map((id) => authorsById.get(id) ?? []);
   });
 
 const userToSubscribeLoader = (prisma: PrismaClient) =>
@@ -88,12 +88,12 @@ const userToSubscribeLoader = (prisma: PrismaClient) =>
 
     const subscriptionsBySubscriberId = subscriptions.reduce((map, user) => {
       user.subscribedToUser.forEach((subscription) => {
-        const existingSubscriptions = map.get(subscription.subscriberId) || [];
+        const existingSubscriptions = map.get(subscription.subscriberId) ?? [];
         existingSubscriptions.push(user);
         map.set(subscription.subscriberId, existingSubscriptions);
       });
       return map;
     }, new Map<string, Subscription[]>());
 
-    return userIds.map((id) => subscriptionsBySubscriberId.get(id) || []);
+    return userIds.map((id) => subscriptionsBySubscriberId.get(id) ?? []);
   });
